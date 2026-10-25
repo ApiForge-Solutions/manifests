@@ -1,0 +1,102 @@
+# ---------------------------------------------------------------------------
+# Valeurs par défaut du chart. Chaque environnement les surcharge avec
+# envs/values-<env>.yaml (dev, staging, qa, prod).
+# ---------------------------------------------------------------------------
+
+environment: dev
+appEnvironment: local
+
+adminer:
+  enabled: true
+  replicas: 1
+
+  image:
+    repository: adminer
+    tag: latest
+
+  containerPort: 8080
+
+  design: pepa-linha-dark
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+
+backend:
+  replicas: 2
+
+  image:
+    repository: apiforgesolutions/fastapi-traefik   
+    tag: backend
+
+  containerPort: 8000
+
+  database:
+    host: db
+    port: 5432
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+
+
+frontend:
+  replicas: 2
+
+  image:
+    repository: apiforgesolutions/fastapi-traefik   
+    tag: frontend
+
+  containerPort: 80
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+
+database:
+  storage:
+    size: 5Gi
+    hostPath: /data/postgresql
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+
+secrets:
+  create: true
+  postgresUser: ""
+  postgresPassword: ""
+  postgresDb: ""
+  secretKey: ""
+  firstSuperuserPassword: ""
+
+
+ingress:
+  host: "api-demo.apiforge.cloud-ip.cc"
+  className: traefik
+  clusterIssuer: letsencrypt-prod
+
+
+appConfig:
+  projectName: FastAPI
+  firstSuperuser: "aapiforgesolutions@gmail.com"

@@ -1,0 +1,26 @@
+environment: qa
+appEnvironment: staging
+
+ingress:
+  host: fastapi-qa.apiforge.cloud-ip.cc
+  clusterIssuer: letsencrypt-staging
+
+backend:
+  image:
+    tag: "backend"
+  replicas: 1
+frontend:
+  image:
+    tag: "frontend"
+  replicas: 1
+
+adminer:
+  enabled: false
+
+database:
+  storage:
+    size: 1Gi
+    hostPath: /data/postgresql-qa
+
+secrets:
+  create: false

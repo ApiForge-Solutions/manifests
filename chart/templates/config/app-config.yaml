@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  DOMAIN: {{ .Values.ingress.host | quote }}
+  FRONTEND_HOST: {{ printf "https://%s" .Values.ingress.host | quote }}
+  ENVIRONMENT: {{ .Values.appEnvironment | quote }}
+  PROJECT_NAME: {{ .Values.appConfig.projectName | quote }}
+  FIRST_SUPERUSER: {{ .Values.appConfig.firstSuperuser | quote }}
+  BACKEND_CORS_ORIGINS: '["https://{{ .Values.ingress.host }}"]'
