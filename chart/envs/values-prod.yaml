@@ -1,0 +1,24 @@
+environment: prod
+appEnvironment: production
+
+ingress:
+  host: fastapi-prod.apiforge.cloud-ip.cc
+  clusterIssuer: letsencrypt-prod
+backend:
+  image:
+    tag: "backend"
+  replicas: 2
+frontend:
+  image:
+    tag: "frontend"
+  replicas: 2
+
+adminer:
+  enabled: false
+database:
+  storage:
+    size: 5Gi
+    hostPath: /data/postgresql-prod
+
+secrets:
+  create: false

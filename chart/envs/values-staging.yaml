@@ -1,0 +1,26 @@
+environment: staging
+appEnvironment: staging
+
+ingress:
+  host: fastapi-staging.apiforge.cloud-ip.cc
+  clusterIssuer: letsencrypt-staging
+
+backend:
+  image:
+    tag: "backend"
+  replicas: 2
+frontend:
+  image:
+    tag: "frontend"
+  replicas: 2
+
+adminer:
+  enabled: false
+
+database:
+  storage:
+    size: 2Gi
+    hostPath: /data/postgresql-staging
+
+secrets:
+  create: false

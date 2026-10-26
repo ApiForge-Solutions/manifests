@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fastapi-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io   # delete application resources when the application is deleted
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ApiForge-Solutions/manifests.git
+    targetRevision: main
+    path: chart
+    helm:
+      valueFiles:
+        - envs/values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  syncPolicy:
+    # Manual validation of the application is required before it can be deployed to the cluster.
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
