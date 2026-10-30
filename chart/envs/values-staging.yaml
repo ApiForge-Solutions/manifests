@@ -7,11 +7,11 @@ ingress:
 
 backend:
   image:
-    tag: "backend" # ci:backend-tag
+    tag: "backend-ff16221b"   # ci:backend-tag
   replicas: 2
 frontend:
   image:
-    tag: "frontend" # ci:frontend-tag
+    tag: "frontend-ff16221b"   # ci:frontend-tag
   replicas: 2
 
 adminer:
