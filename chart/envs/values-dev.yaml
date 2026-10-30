@@ -20,7 +20,7 @@ adminer:
 database:
   storage:
     size: 1Gi
-    hostPath: /data/postgresql-dev # ci:frontend-tag
+    hostPath: /data/postgresql-dev 
 
 secrets:
   create: false
