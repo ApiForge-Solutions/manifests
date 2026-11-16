@@ -85,9 +85,9 @@ database:
   backup:
     enabled: false
     schedule: "30 2 * * *"          # 02h30 UTC, après la sauvegarde Velero de 02h00
-    retention: "7d"
+    # Rétention : règle de cycle de vie MinIO sur le bucket (7 jours), voir le rôle Ansible minio.
     dumpImage: postgres:12          # même version majeure que le serveur
-    mcImage: minio/mc:latest        # à figer sur une version précise
+    uploadImage: amazon/aws-cli:2.17.0   # minio/mc a été retiré de Docker Hub ; le client S3 AWS parle à MinIO
     s3:
       endpoint: "http://10.10.10.107:9000"   # VM MinIO (adresse fixe)
       bucket: db-backup

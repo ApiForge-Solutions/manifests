@@ -1,5 +1,6 @@
 {{- if .Values.database.backup.enabled }}
 # Sauvegarde logique de PostgreSQL (pg_dump) vers MinIO.
+# La rétention (7 jours) est appliquée côté MinIO par une règle de cycle de vie sur le bucket.
 # Le Secret db-backup-s3 (S3_ACCESS_KEY, S3_SECRET_KEY) est créé par le pipeline Jenkins,
 # comme db-secret : il n'est donc pas défini dans ce chart.
 apiVersion: batch/v1
@@ -58,32 +59,30 @@ spec:
                   mountPath: /dump
           containers:
             - name: upload
-              image: {{ .Values.database.backup.mcImage | quote }}
+              image: {{ .Values.database.backup.uploadImage | quote }}
               command: ["sh", "-c"]
               args:
                 - |
                   set -eu
-                  mc alias set s3 "$S3_ENDPOINT" "$S3_ACCESS_KEY" "$S3_SECRET_KEY"
-                  mc cp /dump/*.dump "s3/$S3_BUCKET/$NAMESPACE/"
-                  mc rm --recursive --force --older-than "$RETENTION" "s3/$S3_BUCKET/$NAMESPACE/"
-                  mc ls "s3/$S3_BUCKET/$NAMESPACE/"
+                  for f in /dump/*.dump; do
+                    aws s3 cp "$f" "s3://$S3_BUCKET/$NAMESPACE/$(basename "$f")" --endpoint-url "$S3_ENDPOINT"
+                  done
+                  aws s3 ls "s3://$S3_BUCKET/$NAMESPACE/" --endpoint-url "$S3_ENDPOINT"
               env:
-                - name: MC_CONFIG_DIR
-                  value: /tmp/.mc
+                - name: AWS_DEFAULT_REGION
+                  value: us-east-1
                 - name: NAMESPACE
                   value: {{ .Release.Namespace | quote }}
                 - name: S3_ENDPOINT
                   value: {{ .Values.database.backup.s3.endpoint | quote }}
                 - name: S3_BUCKET
                   value: {{ .Values.database.backup.s3.bucket | quote }}
-                - name: RETENTION
-                  value: {{ .Values.database.backup.retention | quote }}
-                - name: S3_ACCESS_KEY
+                - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
                       name: db-backup-s3
                       key: S3_ACCESS_KEY
-                - name: S3_SECRET_KEY
+                - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
                       name: db-backup-s3

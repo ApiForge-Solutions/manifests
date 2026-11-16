@@ -1,0 +1,69 @@
+diff --git a/chart/templates/db/db-backup-cronjob.yaml b/chart/templates/db/db-backup-cronjob.yaml
+index efe6910..eb095e8 100644
+--- a/chart/templates/db/db-backup-cronjob.yaml
++++ b/chart/templates/db/db-backup-cronjob.yaml
+@@ -1,5 +1,6 @@
+ {{- if .Values.database.backup.enabled }}
+ # Sauvegarde logique de PostgreSQL (pg_dump) vers MinIO.
++# La rétention (7 jours) est appliquée côté MinIO par une règle de cycle de vie sur le bucket.
+ # Le Secret db-backup-s3 (S3_ACCESS_KEY, S3_SECRET_KEY) est créé par le pipeline Jenkins,
+ # comme db-secret : il n'est donc pas défini dans ce chart.
+ apiVersion: batch/v1
+@@ -58,32 +59,30 @@ spec:
+                   mountPath: /dump
+           containers:
+             - name: upload
+-              image: {{ .Values.database.backup.mcImage | quote }}
++              image: {{ .Values.database.backup.uploadImage | quote }}
+               command: ["sh", "-c"]
+               args:
+                 - |
+                   set -eu
+-                  mc alias set s3 "$S3_ENDPOINT" "$S3_ACCESS_KEY" "$S3_SECRET_KEY"
+-                  mc cp /dump/*.dump "s3/$S3_BUCKET/$NAMESPACE/"
+-                  mc rm --recursive --force --older-than "$RETENTION" "s3/$S3_BUCKET/$NAMESPACE/"
+-                  mc ls "s3/$S3_BUCKET/$NAMESPACE/"
++                  for f in /dump/*.dump; do
++                    aws s3 cp "$f" "s3://$S3_BUCKET/$NAMESPACE/$(basename "$f")" --endpoint-url "$S3_ENDPOINT"
++                  done
++                  aws s3 ls "s3://$S3_BUCKET/$NAMESPACE/" --endpoint-url "$S3_ENDPOINT"
+               env:
+-                - name: MC_CONFIG_DIR
+-                  value: /tmp/.mc
++                - name: AWS_DEFAULT_REGION
++                  value: us-east-1
+                 - name: NAMESPACE
+                   value: {{ .Release.Namespace | quote }}
+                 - name: S3_ENDPOINT
+                   value: {{ .Values.database.backup.s3.endpoint | quote }}
+                 - name: S3_BUCKET
+                   value: {{ .Values.database.backup.s3.bucket | quote }}
+-                - name: RETENTION
+-                  value: {{ .Values.database.backup.retention | quote }}
+-                - name: S3_ACCESS_KEY
++                - name: AWS_ACCESS_KEY_ID
+                   valueFrom:
+                     secretKeyRef:
+                       name: db-backup-s3
+                       key: S3_ACCESS_KEY
+-                - name: S3_SECRET_KEY
++                - name: AWS_SECRET_ACCESS_KEY
+                   valueFrom:
+                     secretKeyRef:
+                       name: db-backup-s3
+diff --git a/chart/values.yaml b/chart/values.yaml
+index 32e11fb..e035848 100644
+--- a/chart/values.yaml
++++ b/chart/values.yaml
+@@ -85,9 +85,9 @@ database:
+   backup:
+     enabled: false
+     schedule: "30 2 * * *"          # 02h30 UTC, après la sauvegarde Velero de 02h00
+-    retention: "7d"
++    # Rétention : règle de cycle de vie MinIO sur le bucket (7 jours), voir le rôle Ansible minio.
+     dumpImage: postgres:12          # même version majeure que le serveur
+-    mcImage: minio/mc:latest        # à figer sur une version précise
++    uploadImage: amazon/aws-cli:2.17.0   # minio/mc a été retiré de Docker Hub ; le client S3 AWS parle à MinIO
+     s3:
+       endpoint: "http://10.10.10.107:9000"   # VM MinIO (adresse fixe)
+       bucket: db-backup
