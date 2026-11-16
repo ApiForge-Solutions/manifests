@@ -21,6 +21,8 @@ database:
   storage:
     size: 2Gi
     hostPath: /data/postgresql-staging
+  backup:
+    enabled: true
 
 secrets:
   create: false

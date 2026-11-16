@@ -19,6 +19,8 @@ database:
   storage:
     size: 5Gi
     hostPath: /data/postgresql-prod
+  backup:
+    enabled: true
 
 secrets:
   create: false

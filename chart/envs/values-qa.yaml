@@ -21,6 +21,8 @@ database:
   storage:
     size: 1Gi
     hostPath: /data/postgresql-qa
+  backup:
+    enabled: true
 
 secrets:
   create: false
