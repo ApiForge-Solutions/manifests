@@ -81,6 +81,24 @@ database:
       cpu: 500m
       memory: 512Mi
 
+  # Sauvegarde logique (pg_dump) vers MinIO. Désactivée par défaut : on l'active par environnement.
+  backup:
+    enabled: false
+    schedule: "30 2 * * *"          # 02h30 UTC, après la sauvegarde Velero de 02h00
+    retention: "7d"
+    dumpImage: postgres:12          # même version majeure que le serveur
+    mcImage: minio/mc:latest        # à figer sur une version précise
+    s3:
+      endpoint: "http://10.10.10.107:9000"   # VM MinIO (adresse fixe)
+      bucket: db-backup
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
 
 secrets:
   create: true

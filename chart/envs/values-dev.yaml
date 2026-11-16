@@ -20,7 +20,9 @@ adminer:
 database:
   storage:
     size: 1Gi
-    hostPath: /data/postgresql-dev 
+    hostPath: /data/postgresql-dev
+  backup:
+    enabled: true
 
 secrets:
   create: false

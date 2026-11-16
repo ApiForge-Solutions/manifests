@@ -15,6 +15,7 @@ back-deployement.yml, back-service.yml	Backend FastAPI, 2 réplicas, probes sur 
 front-deployement.yml, front-service.yml	Frontend, 2 réplicas
 db-deployement.yaml, services-db.yml	PostgreSQL 12 en StatefulSet
 pv.yaml, pvc-db.yaml	Stockage 5 Gi de la base (hostPath, mono-nœud)
+chart/templates/db/db-backup-cronjob.yaml	Sauvegarde pg_dump quotidienne vers MinIO (bucket db-backup), activée par environnement
 prestart-job.yml	Job de migration et d'initialisation (scripts/prestart.sh)
 adminer-*	Interface d'administration de la base (usage interne uniquement)
 ingress.yaml	Routage Traefik : /api vers le backend, / vers le frontend
