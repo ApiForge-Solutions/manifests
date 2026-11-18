@@ -6,11 +6,11 @@ ingress:
   clusterIssuer: letsencrypt-prod
 backend:
   image:
-    tag: "backend-84f95676"   # ci:backend-tag
+    tag: "backend-f0464290"   # ci:backend-tag
   replicas: 2
 frontend:
   image:
-    tag: "frontend-84f95676"   # ci:frontend-tag
+    tag: "frontend-f0464290"   # ci:frontend-tag
   replicas: 2
 
 adminer:
